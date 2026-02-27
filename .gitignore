@@ -1,0 +1,4 @@
+.env
+*.ww
+dist
+node_modules
