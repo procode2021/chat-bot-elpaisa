@@ -14,7 +14,7 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
   private readyWatchdog: NodeJS.Timeout | null = null;
   private startPromise: Promise<void> | null = null;
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(private readonly config: ConfigService) { }
 
   private resolveBrowserExecutablePath(): string | undefined {
     const explicit = this.config.get<string>('WA_WEB_EXECUTABLE_PATH') || undefined;
@@ -58,7 +58,7 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
 
     try {
       await (c as any)?.destroy?.();
-    } catch {}
+    } catch { }
   }
 
   private async startInternal(): Promise<void> {
@@ -178,9 +178,9 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
     const options =
       input.name || input.address
         ? {
-            ...(input.name ? { name: input.name } : {}),
-            ...(input.address ? { address: input.address } : {})
-          }
+          ...(input.name ? { name: input.name } : {}),
+          ...(input.address ? { address: input.address } : {})
+        }
         : undefined;
     await this.client.sendMessage(input.to, new Location(input.lat, input.lng, options));
   }

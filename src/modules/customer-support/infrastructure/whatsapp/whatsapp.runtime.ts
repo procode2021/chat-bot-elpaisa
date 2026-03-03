@@ -13,7 +13,7 @@ export class WhatsAppRuntime implements OnModuleInit {
     private readonly usecase: HandleInboundMessageUseCase,
     private readonly botState: BotStateService,
     @Inject(TOKENS.WhatsAppProvider) private readonly provider: WhatsAppProvider
-  ) {}
+  ) { }
 
   async onModuleInit(): Promise<void> {
     const selected = (this.config.get<string>('WHATSAPP_PROVIDER') ?? 'cloud').toLowerCase();
@@ -30,18 +30,18 @@ export class WhatsAppRuntime implements OnModuleInit {
     if (!isWebJs) return;
 
     const webProvider = this.provider as unknown as WhatsAppWebJsProvider;
-    webProvider.onAnyMessage(async (msg: any, meta: { event: 'message' | 'message_create' }) => {
+    webProvider.onMessage(async (msg: any) => {
       try {
         const inbound = this.provider.parseInbound(msg);
         if (!inbound) return;
 
-        // Avoid reacting to our own outgoing messages (common when listening to message_create).
+        // Avoid reacting to our own outgoing messages.
         const fromMe = Boolean((msg as any)?.fromMe);
         if (fromMe) return;
 
         if (!this.botState.isEnabled()) return;
 
-        console.log(`[whatsapp-webjs] inbound event=${meta.event} from=${inbound.from} text=${JSON.stringify(inbound.text)}`);
+        console.log(`[whatsapp-webjs] inbound event=message from=${inbound.from} text=${JSON.stringify(inbound.text)}`);
 
         const result = await this.usecase.execute(inbound.from, inbound.text);
         if (result.location) {
