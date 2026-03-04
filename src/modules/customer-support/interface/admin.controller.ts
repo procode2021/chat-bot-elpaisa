@@ -105,7 +105,7 @@ export class AdminController {
           <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="text-xs font-medium text-slate-700">Nombre</label>
-              <input id="name" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100" placeholder="Óptica Visión Clara" />
+              <input id="name" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100" placeholder="Taller Óptico El Paisa" />
             </div>
             <div>
               <label class="text-xs font-medium text-slate-700">Teléfono</label>
@@ -128,7 +128,7 @@ export class AdminController {
 
             <div class="sm:col-span-2">
               <label class="text-xs font-medium text-slate-700">Dirección</label>
-              <input id="address" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100" placeholder="Calle 123 #45-67, Bogotá, Colombia." />
+              <input id="address" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100" placeholder="Cra 2 #29-29 Centro, Montería" />
             </div>
 
             <div>
@@ -154,7 +154,7 @@ export class AdminController {
             </div>
             <div>
               <label class="text-xs font-medium text-slate-700">Facebook</label>
-              <input id="facebook" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100" placeholder="Óptica Visión Clara" />
+              <input id="facebook" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100" placeholder="Taller Óptico El Paisa" />
             </div>
 
             <div class="sm:col-span-2">

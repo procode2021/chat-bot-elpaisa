@@ -31,9 +31,9 @@ import { AppointmentsModule } from '../appointments/appointments.module';
     { provide: TOKENS.ConversationRepository, useClass: ConversationMongoRepository },
     {
       provide: TOKENS.WhatsAppProvider,
-      inject: [ConfigService],
+      inject: [ConfigService, BotStateService],
       useFactory: createWhatsAppProvider
     }
   ]
 })
-export class CustomerSupportModule {}
+export class CustomerSupportModule { }
