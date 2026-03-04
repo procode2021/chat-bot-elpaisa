@@ -22,7 +22,7 @@ export class AdminController {
     private readonly config: ConfigService,
     private readonly botState: BotStateService,
     @Inject(APPOINTMENTS_TOKENS.AppointmentRepository) private readonly appointments: AppointmentRepository
-  ) {}
+  ) { }
 
   @Get()
   @Header('content-type', 'text/html; charset=utf-8')
@@ -34,6 +34,7 @@ export class AdminController {
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Panel Admin · Chatbot</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100 text-slate-900">
   <div class="mx-auto max-w-7xl p-5 sm:p-6">
@@ -79,6 +80,7 @@ export class AdminController {
           <div class="text-xs font-semibold tracking-wide text-slate-500">NAVEGACIÓN</div>
           <nav class="mt-3 space-y-1 text-sm">
             <a href="#section-business" class="block rounded-xl px-3 py-2 text-slate-700 hover:bg-slate-50">Datos del negocio</a>
+            <a href="#section-qr" class="block rounded-xl px-3 py-2 text-slate-700 hover:bg-slate-50 font-medium text-indigo-600">WhatsApp QR</a>
             <a href="#section-bot" class="block rounded-xl px-3 py-2 text-slate-700 hover:bg-slate-50">Bot</a>
             <a href="#section-quick" class="block rounded-xl px-3 py-2 text-slate-700 hover:bg-slate-50">Respuestas rápidas</a>
             <a href="#section-appointments" class="block rounded-xl px-3 py-2 text-slate-700 hover:bg-slate-50">Citas</a>
@@ -162,6 +164,19 @@ export class AdminController {
             <div class="sm:col-span-2">
               <label class="text-xs font-medium text-slate-700">Promociones (1 por línea)</label>
               <textarea id="promotions" class="mt-1 min-h-[110px] w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-xs leading-relaxed outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100" placeholder="10%...\n2x1..."></textarea>
+            </div>
+
+            <div class="sm:col-span-2" id="section-qr">
+              <label class="text-xs font-medium text-slate-700">Autenticación WhatsApp (QR)</label>
+              <div id="qrContainer" class="mt-2 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
+                <div id="qrPlaceholder" class="text-center">
+                  <p class="text-sm text-slate-500">Si el bot requiere autenticación, el código QR aparecerá aquí.</p>
+                </div>
+                <div id="qrImageContainer" class="hidden">
+                  <div id="qrCanvas" class="bg-white p-2 shadow-sm rounded-lg"></div>
+                  <p class="mt-3 text-xs text-slate-500 text-center">Escanea este código desde WhatsApp</p>
+                </div>
+              </div>
             </div>
 
             <div class="sm:col-span-2" id="section-bot">
@@ -569,7 +584,32 @@ export class AdminController {
     };
     $('apptSearch').oninput = () => applyAppointmentsFilter();
 
-    Promise.all([loadState(), loadJson(), loadAppointments()]).catch(e => setMsg('Error inicializando.', true, String(e)));
+    async function loadQr() {
+      const r = await fetch('/admin/qr', { headers });
+      if (!r.ok) return;
+      const { qr } = await r.json();
+      const placeholder = $('qrPlaceholder');
+      const imgContainer = $('qrImageContainer');
+      const canvas = $('qrCanvas');
+
+      if (qr) {
+        placeholder.classList.add('hidden');
+        imgContainer.classList.remove('hidden');
+        clearNode(canvas);
+        const c = document.createElement('canvas');
+        canvas.appendChild(c);
+        QRCode.toCanvas(c, qr, { width: 256, margin: 2 }, (err) => {
+          if (err) console.error(err);
+        });
+      } else {
+        placeholder.classList.remove('hidden');
+        imgContainer.classList.add('hidden');
+      }
+    }
+
+    setInterval(loadQr, 5000);
+
+    Promise.all([loadState(), loadJson(), loadAppointments(), loadQr()]).catch(e => setMsg('Error inicializando.', true, String(e)));
   </script>
 </body>
 </html>`;
@@ -603,6 +643,11 @@ export class AdminController {
     const serialized = JSON.stringify(body, null, 2);
     await writeFile(path, serialized + '\n', 'utf-8');
     return { ok: true };
+  }
+
+  @Get('qr')
+  getQr() {
+    return { qr: this.botState.getQrCode() };
   }
 
   @Get('appointments')

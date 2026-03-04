@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as qrcode from 'qrcode-terminal';
 import { Client, LocalAuth, Location, type Message } from 'whatsapp-web.js';
 import { existsSync } from 'fs';
+import { BotStateService } from '../bot-state.service';
 import type { InboundMessage } from '../../domain/chat';
 import type { WhatsAppProvider } from '../../domain/ports';
 
@@ -14,7 +15,10 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
   private readyWatchdog: NodeJS.Timeout | null = null;
   private startPromise: Promise<void> | null = null;
 
-  constructor(private readonly config: ConfigService) { }
+  constructor(
+    private readonly config: ConfigService,
+    private readonly botState: BotStateService
+  ) { }
 
   private resolveBrowserExecutablePath(): string | undefined {
     const explicit = this.config.get<string>('WA_WEB_EXECUTABLE_PATH') || undefined;
@@ -97,6 +101,7 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
       client.on('qr', (qr: string) => {
         try {
           console.log('[whatsapp-webjs] qr received');
+          this.botState.setQrCode(qr);
           qrcode.generate(qr, { small: true });
         } catch (err) {
           console.log('[whatsapp-webjs] qr render error', err);
@@ -104,6 +109,7 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
       });
       client.on('authenticated', () => {
         this.authenticatedOnce = true;
+        this.botState.setQrCode(null);
         console.log('[whatsapp-webjs] authenticated');
 
         if (this.readyWatchdog) clearTimeout(this.readyWatchdog);
@@ -116,6 +122,7 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
       client.on('disconnected', (reason: string) => console.log(`[whatsapp-webjs] disconnected: ${reason}`));
       client.on('ready', () => {
         this.readyOnce = true;
+        this.botState.setQrCode(null);
         if (this.readyWatchdog) clearTimeout(this.readyWatchdog);
         this.readyWatchdog = null;
         console.log('[whatsapp-webjs] ready');
