@@ -29,5 +29,20 @@ export class UserSessionMongoRepository implements UserSessionRepository {
       .updateOne({ user }, { $setOnInsert: { user }, $set: { appointmentDraft: null } }, { upsert: true })
       .exec();
   }
+
+  async getPendingSedeSelection(user: string): Promise<string | null> {
+    const doc = await this.model.findOne({ user }, { pendingSedeSelection: 1 }).lean().exec();
+    return (doc as any)?.pendingSedeSelection ?? null;
+  }
+
+  async setPendingSedeSelection(user: string, value: string | null): Promise<void> {
+    await this.model
+      .updateOne(
+        { user },
+        { $setOnInsert: { user }, $set: { pendingSedeSelection: value } },
+        { upsert: true }
+      )
+      .exec();
+  }
 }
 

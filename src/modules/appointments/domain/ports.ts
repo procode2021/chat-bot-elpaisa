@@ -9,5 +9,6 @@ export interface UserSessionRepository {
   getAppointmentDraft(user: string): Promise<AppointmentDraft | null>;
   setAppointmentDraft(user: string, draft: AppointmentDraft): Promise<void>;
   clearAppointmentDraft(user: string): Promise<void>;
+  getPendingSedeSelection(user: string): Promise<string | null>;
+  setPendingSedeSelection(user: string, value: string | null): Promise<void>;
 }
-

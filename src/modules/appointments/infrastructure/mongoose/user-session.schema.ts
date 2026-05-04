@@ -32,6 +32,10 @@ export class UserSessionDoc {
 
   @Prop({ type: AppointmentDraftSchema, default: null })
   appointmentDraft!: AppointmentDraft | null;
+
+  /** null = sin flujo activo; 'sede_cita' = esperando que elija sede para cita/cotización */
+  @Prop({ type: String, default: null })
+  pendingSedeSelection!: string | null;
 }
 
 export type UserSessionDocument = HydratedDocument<UserSessionDoc>;

@@ -71,12 +71,21 @@ export class GeminiAdapter implements LlmClient {
         ? `\n\nInstrucciones del bot:\n${data.bot.instructions.trim()}\n`
         : '';
 
-        const quickReplies = getQuickReplies(data);     const quickRepliesText =       quickReplies.length > 0         ? `\n\nRespuestas rápidas (úsalas cuando apliquen; si piden "agregar filtros digital", pregunta qué filtro y cotiza adicional):\n- ${quickReplies.join('\\n- ')}\n`         : '';  const prompt = `
-Eres un asistente que responde SOLO usando estos datos:
+    const quickReplies = getQuickReplies(data);
+    const quickRepliesText =
+      quickReplies.length > 0
+        ? `\n\nRespuestas rapidas (usalas cuando apliquen; si piden "agregar filtros digital", pregunta que filtro y cotiza adicional):\n- ${quickReplies.join('\n- ')}\n`
+        : '';
+
+    const prompt = `
+Eres un asistente de WhatsApp para informacion general, promociones, precios y dudas frecuentes.
+Responde SOLO usando estos datos. No inventes precios, sedes, horarios, garantias ni promociones.
+Cuando exista una respuesta rapida aplicable, dale prioridad y responde de forma breve y clara.
+No recojas datos personales para citas dentro del chat.
 
 ${JSON.stringify(input.business, null, 2)}
 ${instructions}${quickRepliesText}
-ConversaciÃ³n:
+Conversacion:
 ${input.context.map(c => `${c.role}: ${c.content}`).join('\n')}
 
 Usuario: ${input.message}

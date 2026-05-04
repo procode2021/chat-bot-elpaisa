@@ -102,7 +102,11 @@ export class HandleInboundMessageUseCase {
     }
 
     const context = await this.conversation.getLast(from, maxMessages);
-    const replyText = await this.llm.reply({ message: text, context, business: businessData });
+    let replyText = await this.llm.reply({ message: text, context, business: businessData });
+
+    if (this.appointmentFlow.shouldOfferActions(text)) {
+      replyText = `${replyText}\n${this.appointmentFlow.buildActionPrompt()}`;
+    }
 
     const assistantMsg: ChatMessage = { role: 'assistant', content: replyText, at: new Date() };
     await this.conversation.append(from, assistantMsg, maxStore);

@@ -1,129 +1,140 @@
-import { Inject, Injectable } from '@nestjs/common';
-import type { AppointmentDraft } from '../domain/appointment';
-import type { AppointmentRepository, UserSessionRepository } from '../domain/ports';
-import { APPOINTMENTS_TOKENS } from '../appointments.tokens';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export interface AppointmentFlowResult {
   handled: boolean;
   replyText?: string;
 }
 
-function isAppointmentIntent(text: string): boolean {
-  const t = text.toLowerCase();
+const DEFAULT_FORM_URL = 'https://opticaelpaisa.com.co';
+const DEFAULT_ADVISOR_PHONE = '573205894045';
+const ADVISOR_MESSAGE = 'quiero apartar una cita';
+
+function normalize(text: string): string {
+  return String(text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function includesAny(text: string, words: string[]): boolean {
+  return words.some(word => text.includes(word));
+}
+
+function wantsAppointmentLink(text: string): boolean {
+  const t = normalize(text);
   return (
-    t.includes('cita') ||
-    t.includes('agendar') ||
-    t.includes('agenda') ||
-    t.includes('agend') ||
-    t.includes('turno') ||
-    t.includes('examen') ||
-    t.includes('optometr') ||
-    t.includes('consulta')
+    t === '1' ||
+    includesAny(t, [
+      'apartar cita',
+      'apartar una cita',
+      'agendar cita',
+      'sacar cita',
+      'pedir cita',
+      'formulario',
+      'quiero cita',
+      'quiero apartar'
+    ])
   );
 }
 
-function parseAppointmentDraftFromText(text: string): AppointmentDraft {
-  const t = String(text || '');
-
-  const pick = (re: RegExp) => {
-    const m = t.match(re);
-    return m && m[1] ? String(m[1]).trim() : undefined;
-  };
-
-  const name = pick(/(?:^|\n)\s*nombre\s*[:\-]\s*(.+)\s*$/im);
-  const cc = pick(/(?:^|\n)\s*(?:cc|c\.c\.|cedula|cédula|documento)\s*[:\-]\s*(.+)\s*$/im);
-  const phone =
-    pick(/(?:^|\n)\s*(?:tel(?:efono|éfono)?|cel(?:ular)?|whatsapp)\s*[:\-]\s*(.+)\s*$/im) ??
-    pick(/(\+?\d[\d\s\-]{6,}\d)/);
-  const day = pick(/(?:^|\n)\s*(?:d[ií]a|fecha)\s*(?:de\s*la\s*cita)?\s*[:\-]\s*(.+)\s*$/im);
-  const time = pick(/(?:^|\n)\s*(?:hora|horario)\s*[:\-]\s*(.+)\s*$/im);
-
-  return {
-    ...(name ? { name } : {}),
-    ...(cc ? { cc } : {}),
-    ...(phone ? { phone } : {}),
-    ...(day ? { day } : {}),
-    ...(time ? { time } : {}),
-    rawText: t.trim() || undefined
-  };
+function wantsAdvisor(text: string): boolean {
+  const t = normalize(text);
+  return (
+    t === '2' ||
+    includesAny(t, [
+      'asesor',
+      'humano',
+      'persona',
+      'vendedor',
+      'atencion',
+      'hablar con alguien',
+      'whatsapp'
+    ])
+  );
 }
 
-function mergeDraft(a: AppointmentDraft | null, b: AppointmentDraft): AppointmentDraft {
-  return {
-    name: b.name ?? a?.name,
-    cc: b.cc ?? a?.cc,
-    phone: b.phone ?? a?.phone,
-    day: b.day ?? a?.day,
-    time: b.time ?? a?.time,
-    rawText: b.rawText ?? a?.rawText
-  };
+function shouldOfferNextStep(text: string): boolean {
+  const t = normalize(text);
+  return includesAny(t, [
+    'precio',
+    'precios',
+    'cuanto vale',
+    'cuanto cuesta',
+    'cotizar',
+    'cotizacion',
+    'promocion',
+    'promociones',
+    'lentes',
+    'montura',
+    'monturas',
+    'examen',
+    'optometr',
+    'consulta',
+    'cita',
+    'agendar',
+    'apartar'
+  ]);
 }
 
-function missingDraftFields(draft: AppointmentDraft): string[] {
-  const missing: string[] = [];
-  if (!draft.name) missing.push('Nombre');
-  if (!draft.cc) missing.push('Cc');
-  if (!draft.phone) missing.push('Teléfono');
-  if (!draft.day) missing.push('Día de la cita');
-  if (!draft.time) missing.push('Hora');
-  return missing;
-}
+function buildAdvisorUrl(rawUrl: string | undefined, rawPhone: string | undefined): string {
+  if (rawUrl?.trim()) return rawUrl.trim();
 
-function appointmentTemplate(missing?: string[]): string {
-  const header = '¡Claro! ¿Desea le agendemos la cita!';
-  const fields = [
-    'Datos 📋',
-    `Nombre:${missing && missing.includes('Nombre') ? ' (faltante)' : ''}`,
-    `Cc:${missing && missing.includes('Cc') ? ' (faltante)' : ''}`,
-    `Teléfono:${missing && missing.includes('Teléfono') ? ' (faltante)' : ''}`,
-    `Día de la cita:${missing && missing.includes('Día de la cita') ? ' (faltante)' : ''}`,
-    `Hora:${missing && missing.includes('Hora') ? ' (faltante)' : ''}`
-  ].join('\n');
-  return `${header}\n\n${fields}`;
+  const phone = (rawPhone?.trim() || DEFAULT_ADVISOR_PHONE).replace(/[^\d]/g, '');
+  return `https://wa.me/${phone}?text=${encodeURIComponent(ADVISOR_MESSAGE)}`;
 }
 
 @Injectable()
 export class AppointmentFlowService {
-  constructor(
-    @Inject(APPOINTMENTS_TOKENS.UserSessionRepository) private readonly sessions: UserSessionRepository,
-    @Inject(APPOINTMENTS_TOKENS.AppointmentRepository) private readonly appointments: AppointmentRepository
-  ) {}
+  constructor(private readonly config: ConfigService) {}
 
   async tryHandle(from: string, text: string): Promise<AppointmentFlowResult> {
-    const existingDraft = await this.sessions.getAppointmentDraft(from);
-    if (existingDraft) {
-      const parsed = parseAppointmentDraftFromText(text);
-      const merged = mergeDraft(existingDraft, parsed);
-      const missing = missingDraftFields(merged);
-
-      if (missing.length > 0) {
-        await this.sessions.setAppointmentDraft(from, merged);
-        return { handled: true, replyText: `${appointmentTemplate(missing)}\n\nFaltan: ${missing.join(', ')}.` };
-      }
-
-      const appt = await this.appointments.create({
-        user: from,
-        name: merged.name!,
-        cc: merged.cc!,
-        phone: merged.phone!,
-        day: merged.day!,
-        time: merged.time!,
-        rawText: merged.rawText
-      });
-      await this.sessions.clearAppointmentDraft(from);
-
-      return {
-        handled: true,
-        replyText: `¡Listo! Tu cita quedó agendada.\n\nNombre: ${appt.name}\nCc: ${appt.cc}\nTeléfono: ${appt.phone}\nDía: ${appt.day}\nHora: ${appt.time}`
-      };
+    if (wantsAppointmentLink(text)) {
+      return { handled: true, replyText: this.buildAppointmentLinkMessage() };
     }
 
-    if (isAppointmentIntent(text)) {
-      await this.sessions.setAppointmentDraft(from, { rawText: text });
-      return { handled: true, replyText: appointmentTemplate() };
+    if (wantsAdvisor(text)) {
+      return { handled: true, replyText: this.buildAdvisorMessage() };
     }
 
     return { handled: false };
   }
-}
 
+  shouldOfferActions(text: string): boolean {
+    return shouldOfferNextStep(text);
+  }
+
+  buildActionPrompt(): string {
+    return [
+      '',
+      'Si deseas apartar una cita, elige una opcion:',
+      '',
+      '1. Apartar una cita por formulario',
+      '2. Hablar con un asesor por WhatsApp'
+    ].join('\n');
+  }
+
+  buildAppointmentLinkMessage(): string {
+    const formUrl = this.config.get<string>('APPOINTMENT_FORM_URL')?.trim() || DEFAULT_FORM_URL;
+    return [
+      'Para apartar tu cita, abre este formulario:',
+      formUrl,
+      '',
+      'Tambien puedes responder 2 si prefieres hablar con un asesor.'
+    ].join('\n');
+  }
+
+  buildAdvisorMessage(): string {
+    const advisorUrl = buildAdvisorUrl(
+      this.config.get<string>('ADVISOR_WHATSAPP_URL'),
+      this.config.get<string>('ADVISOR_WHATSAPP_PHONE')
+    );
+
+    return [
+      'Para hablar con un asesor, abre este chat:',
+      advisorUrl,
+      '',
+      `El mensaje ya va preparado con: "${ADVISOR_MESSAGE}".`
+    ].join('\n');
+  }
+}

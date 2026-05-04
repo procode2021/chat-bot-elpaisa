@@ -27,7 +27,8 @@
     "contact": {
       "phone": "+57 320 589 4045",
       "whatsapp": "https://wa.me/573205894045",
-      "email": ""
+      "email": "",
+      "website": "https://talleropticopaisa.com"
     },
     "social": {
       "instagram": "@talleropticopaisa",
@@ -120,8 +121,8 @@
         "reply": "Lentes monofocales foto sensibles (oscurecen en el sol) $200.000. Gratis: montura, examen visual y kit de limpieza. Nota: si desea agregar filtros digital tiene otro valor adicional."
       },
       {
-        "trigger": "agendar cita / cita / agenda",
-        "reply": "¡Claro! ¿Desea le agendemos la cita?\n\nDatos 📋\nNombre:\nCc:\nTeléfono:\nDía de la cita:\nHora:"
+        "trigger": "agendar cita / cita / agenda / cotizar / cotización / sacar cita",
+        "reply": "¡Con gusto te ayudamos! 😊 ¿A cuál de nuestras sedes deseas ir?\n\n📍 *Montería* — Cra 2 #29-29 Centro\n📍 *Lorica* — Calle Principal #12-34\n\nResponde *Montería* o *Lorica* para enviarte el link y número de contacto."
       },
       {
         "trigger": "catálogo / catalogo / ver catalogo / monturas",

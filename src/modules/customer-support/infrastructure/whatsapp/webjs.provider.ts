@@ -14,6 +14,9 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
   private readyOnce = false;
   private readyWatchdog: NodeJS.Timeout | null = null;
   private startPromise: Promise<void> | null = null;
+  private messageHandlers: Array<(msg: Message) => void> = [];
+  private messageCreateHandlers: Array<(msg: Message) => void> = [];
+  private anyMessageHandlers: Array<(msg: Message, meta: { event: 'message' | 'message_create' }) => void> = [];
 
   constructor(
     private readonly config: ConfigService,
@@ -131,6 +134,8 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
       client.on('loading_screen', (percent: number, message: string) =>
         console.log(`[whatsapp-webjs] loading_screen=${percent}% ${message}`)
       );
+
+      this.attachMessageHandlers(client);
     };
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -193,15 +198,39 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
   }
 
   onMessage(handler: (msg: Message) => void) {
+    this.messageHandlers.push(handler);
     this.client?.on('message', handler);
   }
 
   onMessageCreate(handler: (msg: Message) => void) {
+    this.messageCreateHandlers.push(handler);
     this.client?.on('message_create', handler as any);
   }
 
   onAnyMessage(handler: (msg: Message, meta: { event: 'message' | 'message_create' }) => void) {
-    this.client?.on('message', (m: Message) => handler(m, { event: 'message' }));
-    this.client?.on('message_create', (m: Message) => handler(m, { event: 'message_create' }));
+    this.anyMessageHandlers.push(handler);
+    if (this.client) this.attachAnyMessageHandler(this.client, handler);
+  }
+
+  private attachMessageHandlers(client: Client) {
+    for (const handler of this.messageHandlers) {
+      client.on('message', handler);
+    }
+
+    for (const handler of this.messageCreateHandlers) {
+      client.on('message_create', handler as any);
+    }
+
+    for (const handler of this.anyMessageHandlers) {
+      this.attachAnyMessageHandler(client, handler);
+    }
+  }
+
+  private attachAnyMessageHandler(
+    client: Client,
+    handler: (msg: Message, meta: { event: 'message' | 'message_create' }) => void
+  ) {
+    client.on('message', (m: Message) => handler(m, { event: 'message' }));
+    client.on('message_create', (m: Message) => handler(m, { event: 'message_create' }));
   }
 }
