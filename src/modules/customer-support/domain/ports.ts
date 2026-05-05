@@ -19,6 +19,7 @@ export interface ConversationRepository {
 
 export interface WhatsAppProvider {
   start(): Promise<void>;
+  resetSession(): Promise<void>;
   parseInbound(payload: unknown): InboundMessage | null;
   sendMessage(to: string, text: string): Promise<void>;
   sendLocation(input: { to: string; lat: number; lng: number; address?: string; name?: string }): Promise<void>;

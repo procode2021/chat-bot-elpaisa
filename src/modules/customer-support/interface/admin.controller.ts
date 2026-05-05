@@ -6,7 +6,8 @@ import {
   Inject,
   Query,
   StreamableFile,
-  Put
+  Put,
+  Post
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { readFile, writeFile } from 'fs/promises';
@@ -15,13 +16,16 @@ import type { Appointment } from '../../appointments/domain/appointment';
 import type { AppointmentRepository } from '../../appointments/domain/ports';
 import { APPOINTMENTS_TOKENS } from '../../appointments/appointments.tokens';
 import * as ExcelJS from 'exceljs';
+import type { WhatsAppProvider } from '../domain/ports';
+import { TOKENS } from '../customer-support.tokens';
 
 @Controller('admin')
 export class AdminController {
   constructor(
     private readonly config: ConfigService,
     private readonly botState: BotStateService,
-    @Inject(APPOINTMENTS_TOKENS.AppointmentRepository) private readonly appointments: AppointmentRepository
+    @Inject(APPOINTMENTS_TOKENS.AppointmentRepository) private readonly appointments: AppointmentRepository,
+    @Inject(TOKENS.WhatsAppProvider) private readonly whatsapp: WhatsAppProvider
   ) { }
 
   @Get()
@@ -648,6 +652,12 @@ export class AdminController {
   @Get('qr')
   getQr() {
     return { qr: this.botState.getQrCode() };
+  }
+
+  @Post('whatsapp/reset-session')
+  async resetWhatsAppSession() {
+    await this.whatsapp.resetSession();
+    return { ok: true };
   }
 
   @Get('appointments')

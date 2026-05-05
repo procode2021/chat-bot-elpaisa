@@ -12,6 +12,10 @@ export class WhatsAppCloudProvider implements WhatsAppProvider {
     return;
   }
 
+  async resetSession(): Promise<void> {
+    return;
+  }
+
   parseInbound(payload: unknown): InboundMessage | null {
     const body: any = payload;
     const msg = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];

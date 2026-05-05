@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import * as qrcode from 'qrcode-terminal';
 import { Client, LocalAuth, Location, type Message } from 'whatsapp-web.js';
 import { existsSync } from 'fs';
+import { rm } from 'fs/promises';
+import { resolve } from 'path';
 import { BotStateService } from '../bot-state.service';
 import type { InboundMessage } from '../../domain/chat';
 import type { WhatsAppProvider } from '../../domain/ports';
@@ -53,6 +55,39 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
     return this.startPromise;
   }
 
+  async resetSession(): Promise<void> {
+    const clientId = this.config.get<string>('WA_WEB_CLIENT_ID') ?? 'bot-1';
+    const authPath = this.config.get<string>('WA_WEB_AUTH_PATH') ?? '.wwebjs_auth';
+    const resolvedAuthPath = resolve(process.cwd(), authPath);
+
+    console.log(`[whatsapp-webjs] resetting session (clientId=${clientId}, authPath=${resolvedAuthPath})`);
+
+    if (this.readyWatchdog) clearTimeout(this.readyWatchdog);
+    this.readyWatchdog = null;
+    this.startPromise = null;
+
+    const c = this.client;
+    this.client = null;
+    this.authenticatedOnce = false;
+    this.readyOnce = false;
+    this.botState.setQrCode(null);
+
+    try {
+      await (c as any)?.logout?.();
+    } catch (err) {
+      console.log('[whatsapp-webjs] logout during reset failed', err);
+    }
+
+    try {
+      await (c as any)?.destroy?.();
+    } catch (err) {
+      console.log('[whatsapp-webjs] destroy during reset failed', err);
+    }
+
+    await rm(resolvedAuthPath, { recursive: true, force: true });
+    await this.start();
+  }
+
   private async restart(reason: string): Promise<void> {
     console.log(`[whatsapp-webjs] restarting (${reason})`);
     if (this.readyWatchdog) clearTimeout(this.readyWatchdog);
@@ -90,7 +125,10 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
 
     const makeClient = () =>
       new Client({
-        authStrategy: new LocalAuth({ clientId }),
+        authStrategy: new LocalAuth({
+          clientId,
+          dataPath: this.config.get<string>('WA_WEB_AUTH_PATH') ?? '.wwebjs_auth'
+        }),
         restartOnAuthFail: true,
         webVersionCache: { type: 'none' },
         puppeteer: {
