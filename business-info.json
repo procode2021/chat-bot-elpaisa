@@ -7,9 +7,17 @@
       "virtualAssistant": "Disponible 24/7 para resolver dudas, agendar citas y brindar información"
     },
     "locations": {
+      "tierralta": {
+        "name": "Tierralta",
+        "address": "Calle 8 # 14-7 P1 local 103",
+        "phone": "+57 3212066848",
+        "whatsapp": "https://wa.me/573212066848",
+        "lat": 8.757196426391602,
+        "lng": -75.88644409179688
+      },
       "monteria": {
         "name": "Montería",
-        "address": "Cra 2 #29-29 Centro, Montería",
+        "address": "Cra 2 #29-29 Centro, Monter?a",
         "phone": "+57 320 589 4045",
         "whatsapp": "https://wa.me/573205894045",
         "lat": 8.757196426391602,
@@ -17,7 +25,7 @@
       },
       "lorica": {
         "name": "Lorica",
-        "address": "Calle Principal #12-34, Lorica",
+        "address": "Cra. 18 No. 2-50",
         "phone": "+57 310 411 7433",
         "whatsapp": "https://wa.me/573104117433",
         "lat": 9.227192878723145,
@@ -25,8 +33,8 @@
       }
     },
     "contact": {
-      "phone": "+57 320 589 4045",
-      "whatsapp": "https://wa.me/573205894045",
+      "phone": "+57 3212066848",
+      "whatsapp": "https://wa.me/573212066848",
       "email": "",
       "website": "https://talleropticopaisa.com"
     },
@@ -114,15 +122,15 @@
       },
       {
         "trigger": "ubicación / dirección / donde queda / cómo llegan / como llegar",
-        "reply": "Hola, gracias por preferirnos 🤓 Contamos con dos sedes:\n\n📍 *Montería:* Cra 2 #29-29 Centro, Montería\n📞 +57 320 589 4045\n\n📍 *Lorica:* Calle Principal #12-34, Lorica\n📞 +57 310 411 7433\n\n¿A cuál sede desea que le enviemos la ubicación en el mapa? 🗺️"
+        "reply": "Hola, gracias por preferirnos 🤗 Contamos con estas sedes:\n\n📍 *Tierralta:* Calle 8 # 14-7 P1 local 103\n📞 +57 3212066848\n\n📍 *Montería:* Cra 2 #29-29 Centro, Montería\n📞 +57 320 589 4045\n\n📍 *Lorica:* Cra. 18 No. 2-50\n📞 +57 310 411 7433\n\n¿A cuál sede desea que le enviemos la ubicación en el mapa? 🗺️"
       },
       {
         "trigger": "precio lentes fotosensibles / monofocales fotosensibles",
-        "reply": "Lentes monofocales foto sensibles (oscurecen en el sol) $200.000. Gratis: montura, examen visual y kit de limpieza. Nota: si desea agregar filtros digital tiene otro valor adicional."
+        "reply": "Lentes monofocales fotosensibles (oscurecen en el sol) $200.000. Gratis: montura, examen visual y kit de limpieza. Nota: si desea agregar filtro digital tiene un valor adicional."
       },
       {
         "trigger": "agendar cita / cita / agenda / cotizar / cotización / sacar cita",
-        "reply": "¡Con gusto te ayudamos! 😊 ¿A cuál de nuestras sedes deseas ir?\n\n📍 *Montería* — Cra 2 #29-29 Centro\n📍 *Lorica* — Calle Principal #12-34\n\nResponde *Montería* o *Lorica* para enviarte el link y número de contacto."
+        "reply": "¡Con gusto te ayudamos! 😊 ¿A cuál de nuestras sedes deseas ir?\n\n📍 *Tierralta* — Calle 8 # 14-7 P1 local 103\n📍 *Montería* — Cra 2 #29-29 Centro\n📍 *Lorica* — Cra. 18 No. 2-50\n\nResponde *Tierralta*, *Montería* o *Lorica* para enviarte el link y número de contacto."
       },
       {
         "trigger": "catálogo / catalogo / ver catalogo / monturas",
@@ -130,24 +138,35 @@
       },
       {
         "trigger": "precios / precio / lentes / monofocal / descanso / ar blue / transitions",
-        "reply": "Gracias por tu interés en nuestros servicios, los precios son:\n\n✅Lente monofocal blanco terminado o de descanso $100.000\n✅Lentes monofocales terminados o de descanso con filtro Ar Blue $180.000\n✅Lentes monofocales con filtro Foto transitions + Ar Blue $320.000\n\nNota: En los precios anteriores le incluye; exámen visual, lentes medicados, montura de su elección + kit de limpieza.\n¿En cuál de los servicios está interesad@?"
+        "reply": "Gracias por tu interés en nuestros servicios, los precios son:\n\n✅ Lente monofocal blanco terminado o de descanso $100.000\n✅ Lentes monofocales terminados o de descanso con filtro Ar Blue $180.000\n✅ Lentes monofocales con filtro Foto transitions + Ar Blue $320.000\n\nNota: En los precios anteriores se incluye examen visual, lentes medicados, montura de su elección + kit de limpieza.\n¿En cuál de los servicios está interesad@?"
       },
       {
         "trigger": "medios de pago / pago / addi / sistecredito / cuotas",
-        "reply": "Tenemos todos los medios de pago: Efectivo, Transferencias y nuestros aliados que son Addi y SisteCredito.\n\nNota: Para adquirir nuestros lentes por los aliados (ADDI y SisteCredito) es importante que no tenga ningún reporte."
+        "reply": "Tenemos todos los medios de pago: Efectivo, Transferencias y nuestros aliados Addi y SisteCredito.\n\nNota: para adquirir nuestros lentes por ADDI o SisteCredito es importante que no tenga ningún reporte."
       },
       {
         "trigger": "qué es filtro ar / ar blue / transitions / filtro digital",
-        "reply": "Descripción de filtros:\n\n❇️Filtro Ar: reduce los reflejos y mejora la visión.\n\n❇️Filtro Ar Blue: bloquea la luz azul + luces led (luz digital).\n\n❇️ Foto transitions + Ar Blue: bloquea la luz azul + luces led (digital) y bloquea rayos UV (oscurece al salir al sol)."
+        "reply": "Descripción de filtros:\n\n❇️ Filtro Ar: reduce los reflejos y mejora la visión.\n\n❇️ Filtro Ar Blue: bloquea la luz azul + luces LED (luz digital).\n\n❇️ Foto transitions + Ar Blue: bloquea luz azul + luces LED y bloquea rayos UV (oscurece al salir al sol)."
       },
       {
         "trigger": "precio progresivo / lentes progresivos / progresivos transitions / progresivo ar blue",
-        "reply": "Gracias por tu interés en nuestros servicios, los precios son:\n\n✅Lente Progresivo blanco terminado $250.000\n✅Lentes progresivos terminados con filtro Ar Blue $320.000\n✅Lentes progresivos Foto transitions + Ar Blue $380.000\n\nNota: En los precios anteriores le incluye: exámen visual, lentes medicados, montura de su elección + kit de limpieza.\n\nEl examen visual por la compra de los lentes NO tiene costo, si solo necesita la consulta tiene costo de $30.000.\n¿En cuál de los anteriores servicios está interesad@?"
+        "reply": "Gracias por tu interés en nuestros servicios, los precios son:\n\n✅ Lente progresivo blanco terminado $250.000\n✅ Lentes progresivos terminados con filtro Ar Blue $320.000\n✅ Lentes progresivos Foto transitions + Ar Blue $380.000\n\nNota: En los precios anteriores se incluye examen visual, lentes medicados, montura de su elección + kit de limpieza.\n\nEl examen visual por la compra de lentes no tiene costo; si solo necesita la consulta tiene costo de $30.000.\n¿En cuál de los anteriores servicios está interesad@?"
       },
       {
         "trigger": "examen visual / optometría / optometria / agendar examen / cita examen",
-        "reply": "El exámen visual tiene costo de $35.000 de lunes a viernes, ya que en otro laboratorio nos prestan servicio de Optometría (es particular). El día sábado el exámen es totalmente gratis, ya que el doctor viene directamente de la sede principal de Montería.\n\n¿Qué día le agendamos la cita, de LUNES A VIERNES o el día SÁBADO?\n\nOfrecemos todo tipo de lentes medicados:\n- Lentes de descanso\n- Lentes monofocales\n- Lentes progresivos\n- Lentes bifocales\n- Lentes de contacto\n\nHorario de atención para exámenes visuales:⌚\n8:30 AM - 11:30 AM\n02:20 PM - 05:30 PM"
+        "reply": "El examen visual tiene costo de $35.000 de lunes a viernes, ya que un laboratorio externo nos presta servicio de optometría (particular). El día sábado el examen es totalmente gratis, ya que el doctor viene directamente de la sede principal de Montería.\n\n¿Qué día le agendamos la cita, de LUNES A VIERNES o el día SÁBADO?\n\nOfrecemos todo tipo de lentes medicados:\n- Lentes de descanso\n- Lentes monofocales\n- Lentes progresivos\n- Lentes bifocales\n- Lentes de contacto\n\nHorario de atención para exámenes visuales:\n8:30 AM - 11:30 AM\n02:20 PM - 05:30 PM"
       }
-    ]
+    ],
+    "locationFlow": {
+      "keywords": [
+        "ubicación",
+        "dirección",
+        "donde queda",
+        "cómo llegan",
+        "como llegar"
+      ],
+      "introMessage": "Hola, gracias por preferirnos 🤗 Contamos con estas sedes:",
+      "questionMessage": "¿A cuál sede deseas que te enviemos la ubicación en el mapa? 🗺️"
+    }
   }
 }

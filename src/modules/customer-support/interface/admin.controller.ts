@@ -10,11 +10,12 @@ import {
   Post
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { readFile, writeFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import { BotStateService } from '../infrastructure/bot-state.service';
 import type { Appointment } from '../../appointments/domain/appointment';
 import type { AppointmentRepository } from '../../appointments/domain/ports';
 import { APPOINTMENTS_TOKENS } from '../../appointments/appointments.tokens';
+import type { BusinessInfoRepository } from '../domain/ports';
 import * as ExcelJS from 'exceljs';
 import type { WhatsAppProvider } from '../domain/ports';
 import { TOKENS } from '../customer-support.tokens';
@@ -25,6 +26,7 @@ export class AdminController {
     private readonly config: ConfigService,
     private readonly botState: BotStateService,
     @Inject(APPOINTMENTS_TOKENS.AppointmentRepository) private readonly appointments: AppointmentRepository,
+    @Inject(TOKENS.BusinessInfoRepository) private readonly businessInfoRepo: BusinessInfoRepository,
     @Inject(TOKENS.WhatsAppProvider) private readonly whatsapp: WhatsAppProvider
   ) { }
 
@@ -634,9 +636,7 @@ export class AdminController {
 
   @Get('business-info')
   async getBusinessInfo() {
-    const path = this.config.get<string>('BUSINESS_INFO_PATH') ?? 'business-info.json';
-    const raw = await readFile(path, 'utf-8');
-    return JSON.parse(raw);
+    return this.businessInfoRepo.getBusinessInfo();
   }
 
   @Put('business-info')
