@@ -22,15 +22,16 @@ ENV NODE_ENV=production \
     PUPPETEER_SKIP_DOWNLOAD=true
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends chromium ca-certificates dumb-init \
+    && apt-get install -y --no-install-recommends chromium ca-certificates dumb-init gosu \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node business-info.json ./business-info.json
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
 
-USER node
 EXPOSE 3080
 
-ENTRYPOINT ["dumb-init", "--"]
+ENTRYPOINT ["dumb-init", "--", "/usr/local/bin/docker-entrypoint.sh"]
 CMD ["node", "dist/main.js"]
