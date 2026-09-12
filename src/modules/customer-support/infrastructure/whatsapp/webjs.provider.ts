@@ -4,7 +4,7 @@ import * as qrcode from 'qrcode-terminal';
 import { Client, LocalAuth, Location, type Message } from 'whatsapp-web.js';
 import { existsSync } from 'fs';
 import { rm } from 'fs/promises';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { BotStateService } from '../bot-state.service';
 import type { InboundMessage } from '../../domain/chat';
 import type { WhatsAppProvider } from '../../domain/ports';
@@ -59,6 +59,7 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
     const clientId = this.config.get<string>('WA_WEB_CLIENT_ID') ?? 'bot-1';
     const authPath = this.config.get<string>('WA_WEB_AUTH_PATH') ?? '.wwebjs_auth';
     const resolvedAuthPath = resolve(process.cwd(), authPath);
+    const sessionPath = join(resolvedAuthPath, `session-${clientId}`);
 
     console.log(`[whatsapp-webjs] resetting session (clientId=${clientId}, authPath=${resolvedAuthPath})`);
 
@@ -84,8 +85,25 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
       console.log('[whatsapp-webjs] destroy during reset failed', err);
     }
 
-    await rm(resolvedAuthPath, { recursive: true, force: true });
+    // `.wwebjs_auth` is a Docker volume mount in production. A mounted
+    // directory itself cannot be removed, but deleting this client's session
+    // safely produces a new QR on the next startup.
+    await rm(sessionPath, { recursive: true, force: true });
     await this.start();
+  }
+
+  private async clearStaleProfileLocks(clientId: string): Promise<void> {
+    const authPath = this.config.get<string>('WA_WEB_AUTH_PATH') ?? '.wwebjs_auth';
+    const sessionPath = resolve(process.cwd(), authPath, `session-${clientId}`);
+
+    // Chromium leaves these files behind after an unclean shutdown. There is
+    // only one WhatsApp client per container, so they cannot belong to a live
+    // sibling process here.
+    await Promise.all(
+      ['SingletonLock', 'SingletonCookie', 'SingletonSocket'].map(file =>
+        rm(join(sessionPath, file), { force: true })
+      )
+    );
   }
 
   private async restart(reason: string): Promise<void> {
@@ -179,6 +197,7 @@ export class WhatsAppWebJsProvider implements WhatsAppProvider {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       this.authenticatedOnce = false;
       this.readyOnce = false;
+      await this.clearStaleProfileLocks(clientId);
       this.client = makeClient();
       attachEvents(this.client);
 

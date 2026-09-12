@@ -3,7 +3,8 @@ services:
     build:
       context: .
     ports:
-      - "3080:3080"
+      # Nginx on the host is the public HTTPS entrypoint in production.
+      - "127.0.0.1:3080:3080"
     env_file:
       - .env
     environment:
