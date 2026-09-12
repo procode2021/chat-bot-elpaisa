@@ -1,0 +1,29 @@
+services:
+  chatbot:
+    build:
+      context: .
+    ports:
+      - "3080:3080"
+    env_file:
+      - .env
+    environment:
+      # The compose stack supplies its own persistent MongoDB service.
+      APP_PORT: "3080"
+      MONGO_URI: mongodb://mongo:27017/chatbot_ddd
+      WA_WEB_EXECUTABLE_PATH: /usr/bin/chromium
+    depends_on:
+      mongo:
+        condition: service_started
+    restart: unless-stopped
+    volumes:
+      - whatsapp_auth:/app/.wwebjs_auth
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+  whatsapp_auth:

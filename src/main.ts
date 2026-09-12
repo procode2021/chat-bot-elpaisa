@@ -13,7 +13,8 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization']
   });
   const port = Number(config.get('APP_PORT') ?? 3000);
-  await app.listen(port);
+  // `0.0.0.0` makes the HTTP server reachable through Docker port mappings.
+  await app.listen(port, '0.0.0.0');
   console.log(`Server running on http://localhost:${port}`);
 }
 bootstrap();

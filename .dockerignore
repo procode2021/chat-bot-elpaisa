@@ -1,0 +1,7 @@
+.git
+.env
+.wwebjs_auth
+node_modules
+dist
+*.log
+deployment-guide.md
