@@ -1,0 +1,5 @@
+# Required by pnpm 12's supply-chain policy. These scripts are needed during
+# installation; Puppeteer still skips its browser download (see Dockerfile).
+allowBuilds:
+  '@nestjs/core': true
+  puppeteer: true
